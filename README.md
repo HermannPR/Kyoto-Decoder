@@ -37,12 +37,59 @@ archivo precedidos de una cabecera:
 - No cifra: cualquiera con la herramienta puede recuperar el archivo. Si el contenido
   es privado, cífralo antes (por ejemplo con un `.zip` o `.7z` con contraseña).
 
+## Bóveda local (`vault.py`)
+
+`vault.py` es una capa encima de `fotocodec.py`: gestiona una carpeta-bóveda que
+**por fuera parece un gestor de archivos normal** (agregar, listar, buscar, extraer,
+borrar) pero **por dentro guarda cada archivo como imágenes PNG**. Es de **uso local**:
+no sube nada a ningún servicio en la nube.
+
+```sh
+python vault.py agregar  mi-boveda documento.pdf            # lo guarda como PNG(s)
+python vault.py agregar  mi-boveda privado.txt --clave      # pide clave y lo cifra
+python vault.py listar   mi-boveda                          # nombre, tipo, tamaño, fecha
+python vault.py buscar   mi-boveda pdf                      # por nombre o tipo
+python vault.py extraer  mi-boveda documento.pdf -o salida/ # decodifica y verifica SHA-256
+python vault.py borrar   mi-boveda documento.pdf
+```
+
+Estructura de una bóveda:
+
+```
+mi-boveda/
+  index.json          índice legible: nombre original, tipo, tamaño, fecha, sha256, cifrado
+  datos/<id>/*.png    las imágenes PNG de cada archivo
+```
+
+Se conservan el nombre y la extensión originales. Al extraer se verifica el SHA-256
+(y, si el archivo estaba cifrado, la clave y la integridad antes de escribir nada).
+
+### Cifrado opcional
+
+Con `--clave` (o `--pedir-clave`, que la solicita sin mostrarla) el archivo se cifra
+antes de convertirse en imágenes, usando **solo la librería estándar**:
+
+- La clave de 64 bytes se deriva con `PBKDF2-HMAC-SHA256` (200 000 iteraciones, salt
+  aleatorio por archivo).
+- El contenido se cifra con un flujo tipo CTR: cada bloque es
+  `HMAC-SHA256(clave_cifrado, contador)` y se aplica XOR sobre los datos. Como el salt
+  es único por archivo, el flujo nunca se reutiliza.
+- Se usa **encrypt-then-MAC**: un `HMAC-SHA256` sobre el texto cifrado detecta una clave
+  incorrecta o cualquier alteración antes de descifrar.
+
+> Nota: es una construcción de librería estándar razonable, no un formato auditado como
+> AES-GCM. Para secretos de alto valor, cifra además con una herramienta dedicada.
+
 ## Pruebas
 
 ```sh
-python -m unittest -v test_fotocodec
+python -m unittest -v test_fotocodec test_vault
 ```
 
-Cubren ida y vuelta con varios tamaños, nombres con acentos, archivos partidos,
-imágenes alteradas, partes faltantes, PNG re-guardados con los cinco filtros y nombres
-maliciosos que intentan escribir fuera de la carpeta de salida.
+Las de `fotocodec` cubren ida y vuelta con varios tamaños, nombres con acentos, archivos
+partidos, imágenes alteradas, partes faltantes, PNG re-guardados con los cinco filtros y
+nombres maliciosos que intentan escribir fuera de la carpeta de salida.
+
+Las de `vault` cubren ida y vuelta, el índice y sus metadatos, extraer por nombre o por id,
+búsqueda, borrado, archivos partidos en varias imágenes y cifrar/descifrar (incluida la
+detección de clave incorrecta).
