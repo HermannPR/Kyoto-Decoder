@@ -1,6 +1,6 @@
-# foto-codec
+# Kyoto Decoder
 
-Guarda cualquier archivo como una o varias imágenes PNG y lo recupera **idéntico**,
+`fotocodec.py` guarda cualquier archivo como una o varias imágenes PNG y lo recupera **idéntico**,
 verificado con SHA-256. Un solo archivo de Python, sin dependencias: corre en
 Windows, macOS, Linux o Termux (Android) con Python 3.8+.
 
