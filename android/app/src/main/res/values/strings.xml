@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kyoto</string>
+    <string name="share_label">Codificar con Kyoto</string>
+    <string name="channel_name">Trabajos en curso</string>
+</resources>
