@@ -86,6 +86,7 @@ object Fcod1Decoder {
             } catch (e: IOException) {
                 damaged += RejectedImage(s, describe(e))
             } catch (e: RuntimeException) {
+                if (e is java.util.concurrent.CancellationException) throw e
                 damaged += RejectedImage(s, "imagen dañada: ${e.message ?: e.javaClass.simpleName}")
             }
             onScanned(s)
