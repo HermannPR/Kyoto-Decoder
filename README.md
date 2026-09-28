@@ -13,6 +13,13 @@ Los archivos grandes se parten en varias imágenes (`--max-mb`, 20 MB por imagen
 defecto). Para decodificar, pon todas las partes en una carpeta; el orden de los
 nombres no importa.
 
+## App Android
+
+En [`android/`](android/README.md) está **Kyoto para Android** (Kotlin + Compose):
+codifica y recupera con el mismo formato, así que las imágenes van y vienen entre la
+app y `fotocodec.py`. El contrato byte a byte del formato está en
+[`docs/formato-fcod1.md`](docs/formato-fcod1.md).
+
 ## Cómo funciona
 
 Cada imagen es un PNG RGB de 8 bits, cuadrado, cuyos píxeles son los bytes del
